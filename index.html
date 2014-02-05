@@ -1,0 +1,142 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Chat Bibacoeur</title>
+    
+    <style type="text/css">
+        body {
+                background-color : rgb(50,50,80);
+                color : white;
+                text-align : center;
+        }
+        #listePseudos{
+				display : inline-block;
+		}
+		
+		#tchat {
+				display : inline-block;
+                background-color         :        white;
+                opacity                                :        0.8;
+                width                                :        500px;
+                height                                :        300px;
+                margin                                :        auto;
+                border                                :        3px rgb(40,40,40) solid;
+                overflow                        :        auto;
+        }
+        .line {
+                border-bottom                :        1px rgb(80,80,80) solid;
+                padding                                :        4px;
+                text-align:left;
+                color                                :        rgb(40,40,40);
+        }
+        </style>
+</head>
+<body>
+		<script type="text/javascript" src= "http://127.0.0.1:8080/socket.io/socket.io.js"></script>
+		
+
+		<div id="listePseudos">
+			<h2>Liste des connectés :</h2>
+		</div>
+        <div id="tchat"></div>
+			<h1>Tchat Bibacoeur</h1>
+			<h2 id="hPseudo"></h2>
+			<form onsubmit="return (envoiMessage());">
+                <b>Message : </b><input type="text" name="message" id="message" style="width:250px;" /> <input type="submit" value="Envoyer" />
+			</form>
+			
+		<!--
+			<input type="button" id="btRecup" value="Récup conversation"/>
+			<input type="button" id="btEnvoi" value="Envoi message"/>
+		-->
+			<p> test </p>
+			<script type="text/javascript">
+        
+			// On demande le pseudo de l'utilisateur
+			var pseudo = prompt('Votre pseudo ?') || 'Utilisateur';
+			var firstConnect= true;
+		
+			var hPseudo = document.getElementById("hPseudo");
+			hPseudo.innerHTML = 'Identifiant : ' +pseudo;
+		
+		/*
+			if(firstConnect){
+				var socket = io.connect('http://127.0.0.1:8080');
+				firstConnect = false;
+			}
+			else{
+				alert("déja connecté");
+			}
+			socket.emit('firstConnect', pseudo);
+	  
+	  
+	  
+			var btRecup = document.getElementById("btRecup");
+			
+			btRecup.addEventListener("click", function(){
+				socket.emit("getMessages", "");
+				return false;
+			});
+			
+			var btEnvoi = document.getElementById("btEnvoi");
+			
+			btEnvoi.addEventListener("click", function(){
+				envoiMessage();
+				return false;
+			});
+	  
+	  
+	  */
+			//Le serveur envoie la liste de tous les messages (à la connection)
+			socket.on('Messages', function (messages) {
+				for (var i = 0; i < messages.length; i++)
+				document.getElementById('tchat').innerHTML += '<div class="line"><b>'+messages[i].pseudo+'</b> : '+messages[i].message+'</div>';
+			});
+			
+			//Le serveur envoie la liste de tous les pseudos (à la connection)
+			socket.on('Pseudos', function (pseudos) {
+				for (var i = 0; i < pseudos.length ; i++)
+					document.getElementById('listePseudos').innerHTML += '<div id="9'+pseudos[i]+'9">'+pseudos[i]+'</div>';
+			});
+			
+			// Le serveur envoie le nouveau message posté
+			socket.on('Message', function (message) {
+					document.getElementById('tchat').innerHTML += '<div class="line"><b>'+message.pseudo+'</b> : '+message.message+'</div>';
+			});
+			
+			// Le serveur envoie le pseudo de la nouvelle personne connectée
+			socket.on('nouveauClient', function (pseudo) {
+					document.getElementById('tchat').innerHTML += '<div class="line"><b>'+pseudo+'</b> vient de se connecter !</div>';
+					document.getElementById('listePseudos').innerHTML += '<div id="9'+pseudo+'9">'+pseudo+'</div>';
+			});
+			
+			// Le serveur envoie le pseudo de la personne déconnectée
+			socket.on('retirerPseudoDeco', function (pseudo) {
+					document.getElementById('tchat').innerHTML += '<div class="line"><b>'+pseudo+'</b> vient de se déconnecter !</div>';
+					document.getElementById('9'+pseudo+'9').parentNode.removeChild(document.getElementById('9'+pseudo+'9'));
+			});
+			
+			
+			
+			// Quand on veut envoyer un message (quand il a validé le formulaire)
+			function envoiMessage() {
+				var message = document.getElementById('message').value;
+				socket.emit('setNouveauMessage', {'pseudo':pseudo,'message':message}); //on envoie au serveur le message
+				document.getElementById('tchat').innerHTML += '<div class="line"><b>'+pseudo+'</b> : '+message+'</div>';// On affiche directement notre message dans notre page
+				document.getElementById('message').value = ''; // On vide le formulaire
+				return false;// On retourne false pour pas que le formulaire n'actualise pas la page
+			}
+			
+			//lorsqu'on se déconnecte
+			window.onunload = function(){
+				socket.emit("deconnect", pseudo);
+			}
+			
+			//lorsqu'on ouvre la page, non utilisé pour l'instant
+			window.onload = function(){
+				socket.emit("testServeur", "");
+			}
+			</script>
+</body>
+</html>
