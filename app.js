@@ -8,28 +8,22 @@ var server = require('http').createServer(function(req, res){
 var messages = [];
 var pseudos = [];
 
-var io = require('socket.io').listen(server); 
+var io = require('socket.io').listen(server);
 
+io.set('log level', 1);
 io.sockets.on('connection', function (socket) {
-
 
         // Quand on recoit un nouveau message
         socket.on('setNouveauMessage', function (mess) { //message de la forme {'pseudo' : pseudo, 'message' : message }
 			messages.push(mess);
-			console.log(mess);
-			// On envoie a tout les clients connectes le nouveau message
+			console.log('Nouveau message de '+mess.pseudo+' : '+mess.message);
 			socket.broadcast.emit('Message', mess);
-        });
-		
-		//Quand le serveur reçoit une demande d'actualisation des messages
-		socket.on('getMessages', function () {
-			socket.emit('Messages', messages);
-			console.log("liste des messages"+messages);
         });
 		
 		
 		//Quand quelqu'un se connecte
 		socket.on('firstConnect', function (pseudo) {
+			console.log(pseudo+" vient de se connecter.");
 			socket.emit('Messages', messages);
 			socket.emit('Pseudos', pseudos);
 			socket.broadcast.emit('nouveauClient', pseudo); // On envoie a tout les clients connectes le nouveau pseudo
@@ -37,9 +31,9 @@ io.sockets.on('connection', function (socket) {
         });
 		
 		//Quand quelqu'un se déconnecte
-		socket.on("deconnect", function (pseudo) {
+		socket.on("deconnection", function (pseudo) {
+			console.log(pseudo+" vient de se déconnecter.");
 			socket.broadcast.emit("retirerPseudoDeco", pseudo);
-			console.log(pseudo+" vient de se deco");
 			pseudos.removeElement(pseudo);
 		});
 		
@@ -59,8 +53,6 @@ console.log('Live Chat App running at http://192.168.0.13:8080/');
 
 
 pseudos.removeElement = function(elementToBeDlt){
-	console.log(pseudos);
 	i = pseudos.indexOf(elementToBeDlt);
 	pseudos.splice(i,1);
-	console.log(pseudos);
 }

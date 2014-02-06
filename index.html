@@ -46,48 +46,20 @@
                 <b>Message : </b><input type="text" name="message" id="message" style="width:250px;" /> <input type="submit" value="Envoyer" />
 			</form>
 			
-		<!--
-			<input type="button" id="btRecup" value="Récup conversation"/>
-			<input type="button" id="btEnvoi" value="Envoi message"/>
-		-->
-			<p> test </p>
 			<script type="text/javascript">
         
-			// On demande le pseudo de l'utilisateur
+			// On demande le pseudo de l'utilisateur et on l'affiche sur la page
 			var pseudo = prompt('Votre pseudo ?') || 'Utilisateur';
 			var firstConnect= true;
 		
 			var hPseudo = document.getElementById("hPseudo");
 			hPseudo.innerHTML = 'Identifiant : ' +pseudo;
 		
-		/*
-			if(firstConnect){
-				var socket = io.connect('http://127.0.0.1:8080');
-				firstConnect = false;
-			}
-			else{
-				alert("déja connecté");
-			}
+		
+			var socket = io.connect('http://127.0.0.1:8080');
 			socket.emit('firstConnect', pseudo);
 	  
-	  
-	  
-			var btRecup = document.getElementById("btRecup");
-			
-			btRecup.addEventListener("click", function(){
-				socket.emit("getMessages", "");
-				return false;
-			});
-			
-			var btEnvoi = document.getElementById("btEnvoi");
-			
-			btEnvoi.addEventListener("click", function(){
-				envoiMessage();
-				return false;
-			});
-	  
-	  
-	  */
+	 
 			//Le serveur envoie la liste de tous les messages (à la connection)
 			socket.on('Messages', function (messages) {
 				for (var i = 0; i < messages.length; i++)
@@ -130,12 +102,12 @@
 			
 			//lorsqu'on se déconnecte
 			window.onunload = function(){
-				socket.emit("deconnect", pseudo);
+				socket.emit("deconnection", pseudo);
 			}
 			
 			//lorsqu'on ouvre la page, non utilisé pour l'instant
 			window.onload = function(){
-				socket.emit("testServeur", "");
+			
 			}
 			</script>
 </body>
